@@ -1,0 +1,31 @@
+<textarea id="chartData" placeholder="Astro-Seek의 'AI-ChatGPT' 탭 내용을 복사해 붙여넣으세요."></textarea>
+<button onclick="analyzeChart()">심층 분석 시작</button>
+
+<div id="result" class="loading-spinner-hidden"></div>
+
+<script>
+async function analyzeChart() {
+    const data = document.getElementById('chartData').value;
+    
+    // OpenAI API 호출 (브라우저에서 직접 호출 시 API Key 보안 주의)
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: "gpt-4o",
+            messages: [
+                {
+                    role: "system", 
+                    content: "당신은 전문 점성술가입니다. 제공된 Natal Chart 데이터를 기질, 직업적 적성, 내면의 카이론, 인생 변곡점 순서로 심도 있게 분석하세요."
+                },
+                { role: "user", content: data }
+            ]
+        })
+    });
+    const resultData = await response.json();
+    document.getElementById('result').innerText = resultData.choices[0].message.content;
+}
+</script>
