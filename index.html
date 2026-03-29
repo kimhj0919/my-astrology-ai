@@ -3,89 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 점성술 차트 분석기</title>
+    <title>AI 네이탈 차트 분석</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tossPurple: '#6B4EFF', // 토스 느낌의 보라색
+                        tossBg: '#F2F4F6',
+                        tossGray: '#8B95A1',
+                    },
+                    borderRadius: {
+                        'toss': '18px',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #f3f4f6; }
-        .header-blue { background-color: #3b5998; }
-        .btn-blue { background-color: #3b5998; color: white; transition: 0.3s; }
-        .btn-blue:hover { background-color: #2d4373; }
+        body { background-color: #F2F4F6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        select, input { outline: none; transition: border-color 0.2s; }
+        select:focus, input:focus { border-color: #6B4EFF; ring: 1px; ring-color: #6B4EFF; }
+        /* 도시 검색 드롭다운 스타일 */
+        #cityDropdown { max-height: 200px; overflow-y: auto; display: none; }
+        #cityDropdown div:hover { background-color: #F2F4F6; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-10 text-[#191F28]">
 
-    <div class="max-w-3xl mx-auto bg-white shadow-lg border border-gray-200">
-        <div class="header-blue text-white p-3 font-bold text-lg">
-            Birth Chart, Astrology Online Calculator - <span class="font-normal text-sm">Enter your birth data</span>
-        </div>
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-toss shadow-[0_8px_30px_rgb(0,0,0,0.07)]">
+        
+        <header class="mb-10">
+            <h1 class="text-3xl font-bold mb-2">네이탈 차트 분석</h1>
+            <p class="text-tossGray text-lg">당신의 태어난 순간, 별들의 위치를 분석해 드릴게요.</p>
+        </header>
 
-        <div class="p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block font-bold mb-2">Date of Birth</label>
-                    <div class="flex space-x-2">
-                        <select id="day" class="border p-2 w-full"><option>1</option></select>
-                        <select id="month" class="border p-2 w-full">
-                            <option>January</option><option>February</option><option>March</option>
-                            <option>April</option><option>May</option><option>June</option>
-                            <option>July</option><option>August</option><option>September</option>
-                            <option>October</option><option>November</option><option>December</option>
-                        </select>
-                        <select id="year" class="border p-2 w-full"><option>1970</option><option>1971</option></select>
-                    </div>
+        <div class="space-y-8">
+            <section>
+                <label class="block text-sm font-medium text-tossGray mb-2">출생일</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <select id="year" class="border border-gray-200 rounded-xl p-4 text-lg bg-white"></select>
+                    <select id="month" class="border border-gray-200 rounded-xl p-4 text-lg bg-white"></select>
+                    <select id="day" class="border border-gray-200 rounded-xl p-4 text-lg bg-white"></select>
                 </div>
+            </section>
 
-                <div>
-                    <label class="block font-bold mb-2">Time <span class="text-xs text-gray-400 font-normal">(local time)</span></label>
-                    <div class="flex items-center space-x-2">
-                        <select id="hour" class="border p-2 w-full"><option>00 [midn]</option><option>01 [am]</option></select>
-                        <span>h</span>
-                        <select id="min" class="border p-2 w-full"><option>00</option><option>10</option></select>
-                        <span>min</span>
-                        <label class="flex items-center text-xs ml-2"><input type="checkbox" class="mr-1"> (unknown time)</label>
-                    </div>
+            <section>
+                <label class="block text-sm font-medium text-tossGray mb-2">출생 시간 <span class="text-xs">(현지 시간)</span></label>
+                <div class="grid grid-cols-3 gap-3 items-center">
+                    <select id="ampm" class="border border-gray-200 rounded-xl p-4 text-lg bg-white">
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                    <select id="hour" class="border border-gray-200 rounded-xl p-4 text-lg bg-white"></select>
+                    <select id="min" class="border border-gray-200 rounded-xl p-4 text-lg bg-white"></select>
                 </div>
-            </div>
+                <label class="flex items-center text-sm text-tossGray mt-3 cursor-pointer">
+                    <input type="checkbox" id="unknownTime" class="mr-2 accent-tossPurple w-4 h-4"> 시간 모름
+                </label>
+            </section>
 
-            <div>
-                <label class="block font-bold mb-2">Birth city:</label>
-                <input type="text" placeholder="Please start typing and confirm by clicking..." class="w-full border p-2 italic text-gray-500">
-                <p class="text-xs text-blue-600 mt-1 cursor-pointer underline">(Enter coordinates manually)</p>
-            </div>
+            <section class="relative">
+                <label class="block text-sm font-medium text-tossGray mb-2">출생 도시</label>
+                <input type="text" id="cityInput" placeholder="도시 이름을 입력하세요 (예: 서울, 부산...)" class="w-full border border-gray-200 rounded-xl p-4 text-lg">
+                <div id="cityDropdown" class="absolute z-10 w-full bg-white border border-gray-200 rounded-xl mt-1 shadow-lg p-2 space-y-1">
+                    </div>
+            </section>
 
-            <div class="flex justify-center border-t pt-6">
-                <button onclick="goToStep2()" class="btn-blue px-10 py-3 text-xl font-bold rounded shadow-md">
-                    Calculate chart »
+            <div class="pt-6">
+                <button onclick="calculateChart()" class="w-full bg-tossPurple text-white text-xl font-bold py-5 rounded-xl hover:bg-[#573ED9] transition shadow-[0_4px_14px_0_rgba(107,78,255,0.3)]">
+                    차트 계산하기
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="step2" class="hidden mt-10 max-w-3xl mx-auto bg-yellow-50 p-6 border-2 border-dashed border-yellow-400 rounded-lg text-center">
-        <h3 class="text-xl font-bold mb-4">입력이 완료되었습니다!</h3>
-        <p class="mb-4">현재 무료 버전은 외부 사이트 데이터가 필요합니다.<br>아래 버튼을 눌러 정보를 가져와 주세요.</p>
-        <button class="bg-black text-white px-4 py-2 rounded">Astro-Seek에서 데이터 가져오기 가이드</button>
-    </div>
-
     <script>
-        // 간단한 페이지 전환 함수
-        function goToStep2() {
-            document.getElementById('step2').classList.remove('hidden');
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        // --- 1. 데이터 초기화 (날짜, 시간 드롭다운) ---
+        const s = (id) => document.getElementById(id);
+
+        // 연도 (1950~2024)
+        for(let i=2024; i>=1950; i--) {
+            s('year').innerHTML += `<option value="${i}">${i}년</option>`;
+        }
+        // 월 (1~12)
+        for(let i=1; i<=12; i++) {
+            s('month').innerHTML += `<option value="${i}">${i}월</option>`;
+        }
+        // 일 (1~31)
+        for(let i=1; i<=31; i++) {
+            s('day').innerHTML += `<option value="${i}">${i}일</option>`;
+        }
+        // 시간 (01~12) - AM/PM은 별도
+        for(let i=1; i<=12; i++) {
+            let h = i < 10 ? '0'+i : i;
+            s('hour').innerHTML += `<option value="${h}">${h}시</option>`;
+        }
+        // 분 (00~59)
+        for(let i=0; i<60; i++) {
+            let m = i < 10 ? '0'+i : i;
+            s('min').innerHTML += `<option value="${m}">${m}분</option>`;
         }
 
-        // 날짜/연도 셀렉트 박스 자동 채우기 (편의용)
-        const daySelect = document.getElementById('day');
-        for(let i=1; i<=31; i++) {
-            let opt = document.createElement('option');
-            opt.value = i; opt.innerHTML = i;
-            daySelect.appendChild(opt);
-        }
-        const yearSelect = document.getElementById('year');
-        for(let i=2024; i>=1950; i--) {
-            let opt = document.createElement('option');
-            opt.value = i; opt.innerHTML = i;
-            yearSelect.appendChild(opt);
+        // --- 2. 한국 도시 검색 로직 ---
+        // 예시 데이터 (실제 프로젝트에서는 더 많은 데이터를 가져와야 함)
+        const koreanCities = [
+            "서울 (Seoul)", "부산 (Busan)", "인천 (Incheon)", "대구 (Daegu)", "대전 (Daejeon)", 
+            "광주 (Gwangju)", "울산 (Ulsan)", "수원 (Suwon)", "창원 (Changwon)", "성남 (Seongnam)",
+            "고양 (Goyang)", "용인 (Yongin)", "부천 (Bucheon)", "안산 (Ansan)", "청주 (Cheongju)",
+            "전주 (Jeonju)", "천안 (Cheonan)", "김해 (Gimhae)", "포항 (Pohang)", "제주 (Jeju)"
+        ];
+
+        const cityInput = s('cityInput');
+        const cityDropdown = s('cityDropdown');
+
+        cityInput.addEventListener('input', function() {
+            const keyword = this.value.toLowerCase();
+            cityDropdown.innerHTML = ''; // 이전 결과 초기화
+
+            if (keyword) {
+                const filtered = koreanCities.filter(city => city.toLowerCase().includes(keyword));
+                
+                if (filtered.length > 0) {
+                    filtered.forEach(city => {
+                        const div = document.createElement('div');
+                        div.innerHTML = city;
+                        div.className = 'p-3 cursor-pointer rounded-lg text-lg';
+                        div.onclick = function() {
+                            cityInput.value = city;
+                            cityDropdown.style.display = 'none';
+                        };
+                        cityDropdown.appendChild(div);
+                    });
+                    cityDropdown.style.display = 'block';
+                } else {
+                    cityDropdown.style.display = 'none';
+                }
+            } else {
+                cityDropdown.style.display = 'none';
+            }
+        });
+
+        // 드롭다운 바깥 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            if (e.target !== cityInput && e.target !== cityDropdown) {
+                cityDropdown.style.display = 'none';
+            }
+        });
+
+        // --- 3. 버튼 클릭 함수 (임시) ---
+        function calculateChart() {
+            alert('차트 계산 로직을 여기에 구현하세요!');
         }
     </script>
 </body>
